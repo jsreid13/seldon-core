@@ -1,0 +1,25 @@
+# Default values for seldon-core-loadtesting.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  name: 
+  release: 0.1
+replicaCount: 1
+loadtest:
+  id: 1
+  sendFeedback: 0
+locust:
+  script : 
+  host : http://loadtest-loadtest-dummy-model:8000
+  hatchRate: 1
+  clients: 1
+  minWait: 0
+  maxWait: 0
+  payloadPath: /home/seldon/resources/payload-single-model.json
+  rewardBranch: 0
+oauth:
+  enabled: true
+  key: key
+  secret: secret
+data:
+  size: 2

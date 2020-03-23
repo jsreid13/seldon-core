@@ -1,0 +1,7 @@
+apiVersion: v1
+description: Loadtesting for control-sub-mab REST endpoints only
+name: mab-load-test
+version: 0.1.1
+keywords:
+- kubernetes
+- machine-learning

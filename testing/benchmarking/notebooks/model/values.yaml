@@ -1,0 +1,61 @@
+sdepName: loadtest
+
+# pod and deployment name := mlDep.Spec.Name + "-" + predictorSpec.Name + "-" + containerHash(podSpec)
+mlDepSpecName: loadtest
+predictorSpecName: dummy-model
+
+img_tag: 
+  model: latest
+  router: latest
+
+model:
+  image:
+    name: docker.io/seldonio/mock_classifier
+  endpoint: REST
+  name: model
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+
+router:
+  image:
+    name: docker.io/seldonio/mab_epsilon_greedy
+  name: router
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+replicas: 1
+
+# Add oauth key and secret if using the default API Oauth Gateway for ingress
+oauth:
+  key:
+  secret:
+
+hpaspec:
+  minReplicas: 1
+  maxReplicas: 1
+
+sdepLabels:
+  app: "seldon"
+
+predictorLabels:
+  version: "v1"
+  fluentd: "false"
+
+engine:
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+#basic log request and responses env vars below just logs raw messages to engine stdout
+#to make searchable log externally - see request logging example
+  env:
+    SELDON_LOG_LEVEL: "debug"
+    SELDON_LOG_REQUESTS: true
+    SELDON_LOG_RESPONSES: true
+    SELDON_LOG_MESSAGES_EXTERNALLY: false
+    SELDON_LOG_MESSAGE_TYPE: "seldon.message.pair"

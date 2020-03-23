@@ -1,0 +1,54 @@
+apiVersion: machinelearning.seldon.io/v1alpha2
+kind: SeldonDeployment
+metadata:
+  labels:
+    app: seldon
+    deployment_type: gunicorn
+  name: {{ .Values.sdepName }}
+spec:
+  annotations:
+    project_name: Loadtest
+    deployment_version: v1
+  name: {{ .Values.mlDepSpecName }}
+  predictors:
+  - componentSpecs:
+    - spec:
+        containers:
+        - image: {{ .Values.model.image.name }}:{{ .Values.img_tag.model }}
+          name: {{ .Values.model.name }}
+          env:
+          -  name: GUNICORN_WORKERS
+             value: "4"
+          resources: {{ toYaml .Values.model.resources | nindent 14 }}
+        - image: {{ .Values.router.image.name }}:{{ .Values.img_tag.router }}
+          name: {{ .Values.router.name }}
+          resources: {{ toYaml .Values.router.resources | nindent 14 }}
+        terminationGracePeriodSeconds: 20
+      hpaSpec:
+        minReplicas: {{ .Values.hpaspec.minReplicas }}
+        maxReplicas: {{ .Values.hpaspec.maxReplicas }}
+    name: {{ .Values.predictorSpecName }}
+    replicas: {{ .Values.replicas }}
+    annotations:
+      predictor_version: v1
+    graph:
+      name: {{ .Values.router.name }}
+      type: ROUTER
+      parameters:
+      - name: "n_branches"
+        value: "1"
+        type: "INT"
+      - name: "verbose"
+        value: "1"
+        type: "BOOL"
+      children:
+      - name: {{ .Values.model.name }}
+        type: MODEL
+    svcOrchSpec:
+      resources: {{ toYaml .Values.engine.resources | nindent 8 }}
+      env:
+        {{- range $key, $value := .Values.engine.env }}
+      - name: {{ $key }}
+        value: {{ $value | quote }}
+        {{- end}}
+    labels: {{ toYaml .Values.predictorLabels | nindent 8}}  
